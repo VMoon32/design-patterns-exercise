@@ -1,49 +1,42 @@
 package oop.inheritance;
 
-import java.time.LocalDateTime;
-
 import oop.inheritance.data.CommunicationType;
-import oop.inheritance.data.SupportedTerminal;
+import oop.inheritance.terminal.Display;
+import oop.inheritance.terminal.Keyboard;
+import oop.inheritance.terminal.Printer;
+import oop.inheritance.terminal.TerminalFactory;
 import oop.library.ingenico.model.Card;
 import oop.library.ingenico.model.Transaction;
 import oop.library.ingenico.model.TransactionResponse;
 import oop.library.ingenico.services.*;
-import oop.library.v240m.VerifoneV240mDisplay;
+
+import java.time.LocalDateTime;
 
 public class Application {
 
     private CommunicationType communicationType = CommunicationType.ETHERNET;
-    private SupportedTerminal supportedTerminal;
+    //private SupportedTerminal supportedTerminal;
+    private TerminalFactory terminalFactory;
 
-    public Application(SupportedTerminal supportedTerminal) {
-        this.supportedTerminal = supportedTerminal;
+    public Application(TerminalFactory terminalFactory) {
+        this.terminalFactory = terminalFactory;
     }
 
     public void showMenu() {
-        if (supportedTerminal == SupportedTerminal.INGENICO) {
-            IngenicoDisplay ingenicoDisplay = new IngenicoDisplay();
 
-            ingenicoDisplay.showMessage(5, 5, "MENU");
-            ingenicoDisplay.showMessage(5, 10, "1. VENTA");
-            ingenicoDisplay.showMessage(5, 13, "2. DEVOLUCION");
-            ingenicoDisplay.showMessage(5, 16, "3. REPORTE");
-            ingenicoDisplay.showMessage(5, 23, "4. CONFIGURACION");
-        } else {
-            VerifoneV240mDisplay verifoneV240mDisplay = new VerifoneV240mDisplay();
+        Display display = terminalFactory.getDisplay();
 
-            verifoneV240mDisplay.print(5, 5, "MENU");
-            verifoneV240mDisplay.print(5, 10, "1. VENTA");
-            verifoneV240mDisplay.print(5, 13, "2. DEVOLUCION");
-            verifoneV240mDisplay.print(5, 16, "3. REPORTE");
-            verifoneV240mDisplay.print(5, 23, "4. CONFIGURACION");
-        }
-
+        display.showMessage(5, 5, "MENU");
+        display.showMessage(5, 10, "1. VENTA");
+        display.showMessage(5, 13, "2. DEVOLUCION");
+        display.showMessage(5, 16, "3. REPORTE");
+        display.showMessage(5, 23, "4. CONFIGURACION");
     }
 
     public String readKey() {
-        IngenicoKeyboard ingenicoKeyboard = new IngenicoKeyboard();
+        Keyboard keyboard = terminalFactory.getKeyboard();
 
-        return ingenicoKeyboard.getChar();
+        return keyboard.getChar();
     }
 
     public void doSale() {
@@ -82,17 +75,16 @@ public class Application {
     }
 
     private void printReceipt(Transaction transaction, String hostReference) {
-        IngenicoPrinter ingenicoPrinter = new IngenicoPrinter();
+        Printer printer = terminalFactory.getPrinter();
         Card card = transaction.getCard();
 
-        ingenicoPrinter.print(5, "APROBADA");
-        ingenicoPrinter.lineFeed();
-        ingenicoPrinter.print(5, card.getAccount());
-        ingenicoPrinter.lineFeed();
-        ingenicoPrinter.print(5, "" + transaction.getAmountInCents());
-        ingenicoPrinter.lineFeed();
-        ingenicoPrinter.print(5, "________________");
-
+        printer.print(5, "APROBADA");
+        printer.lineFeed();
+        printer.print(5, card.getAccount());
+        printer.lineFeed();
+        printer.print(5, "" + transaction.getAmountInCents());
+        printer.lineFeed();
+        printer.print(5, "________________");
     }
 
     private TransactionResponse sendSale(Transaction transaction) {
@@ -135,14 +127,9 @@ public class Application {
     }
 
     public void clearScreen() {
-        if (supportedTerminal == SupportedTerminal.INGENICO) {
-            IngenicoDisplay ingenicoDisplay = new IngenicoDisplay();
 
-            ingenicoDisplay.clear();
-        } else {
-            VerifoneV240mDisplay verifoneV240mDisplay = new VerifoneV240mDisplay();
+        Display display = terminalFactory.getDisplay();
 
-            verifoneV240mDisplay.clear();
-        }
+        display.clear();
     }
 }
